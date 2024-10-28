@@ -1,101 +1,257 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_ui_design/Cinema%20App%20UI/constants/constants.dart';
 import 'package:flutter_ui_design/Cinema%20App%20UI/models/category_model.dart';
+import 'package:flutter_ui_design/Cinema%20App%20UI/models/movie_model.dart';
 
-class HomePageCinema extends StatelessWidget {
+class HomePageCinema extends StatefulWidget {
   const HomePageCinema({super.key});
+
+  @override
+  State<HomePageCinema> createState() => _HomePageCinemaState();
+}
+
+class _HomePageCinemaState extends State<HomePageCinema> {
+  late PageController controller;
+  double pageOffSet = 1;
+  int currentIndex = 1;
+
+  @override
+  void initState() {
+    controller = PageController(initialPage: 1)
+      ..addListener(() {
+        setState(() {
+          pageOffSet = controller.page!;
+        });
+      });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: appBackgroundColor,
       appBar: const _AppBar(),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 35,
-          ),
-          const _Search(),
-          const SizedBox(
-            height: 30,
-          ),
-          const Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Category',
+      body: SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 35,
+            ),
+            const _Search(),
+            const SizedBox(
+              height: 30,
+            ),
+            const Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Category',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'See All',
+                            style: TextStyle(
+                              color: buttonColor,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 15,
+                            color: buttonColor,
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 17,
+            ),
+            const CategoryItems(),
+            const SizedBox(
+              height: 40,
+            ),
+            Container(
+              height: 300,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      "Showing this month",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 17,
+                        fontSize: 18,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    Row(
+                  ),
+                  const SizedBox(height: 30),
+                  Expanded(
+                    child: Stack(
+                      alignment: Alignment.center,
                       children: [
-                        Text(
-                          'See All',
-                          style: TextStyle(
-                            color: buttonColor,
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        PageView.builder(
+                          controller: controller,
+                          onPageChanged: (index) {
+                            setState(() {
+                              currentIndex = index % movies.length;
+                            });
+                          },
+                          itemBuilder: (context, index) {
+                            double scale = max(
+                              0.6,
+                              (1 - (pageOffSet - index).abs() + 0.6),
+                            );
+                            double angle = (controller.position.haveDimensions
+                                    ? index.toDouble() - (controller.page ?? 0)
+                                    : index.toDouble() - 1) *
+                                5;
+                            angle = angle.clamp(-5, 5);
+                            final movie = movies[index % movies.length];
+
+                            return GestureDetector(
+                              onTap: () {},
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  top: 100 - (scale / 1.6 * 100),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.topCenter,
+                                  children: [
+                                    Transform.rotate(
+                                      angle: angle * pi / 90,
+                                      child: Hero(
+                                        tag: movie.poster,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(25),
+                                          child: Image.network(
+                                            movie.poster,
+                                            height: 300,
+                                            width: 205,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: 15,
-                          color: buttonColor,
-                        )
+                        // Positioned(
+                        //   top: 300,
+                        //   child: Row(
+                        //     children: List.generate(
+                        //       movies.length,
+                        //       (index) => AnimatedContainer(
+                        //         duration: const Duration(milliseconds: 300),
+                        //         margin: const EdgeInsets.only(right: 15),
+                        //         width: currentIndex == index ? 30 : 10,
+                        //         height: 10,
+                        //         decoration: BoxDecoration(
+                        //           color: currentIndex == index
+                        //               ? buttonColor
+                        //               : Colors.white24,
+                        //           borderRadius: BorderRadius.circular(15),
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                       ],
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 17,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(
-              categories.length,
-              (index) => Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.white10.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Image.asset(
-                      categories[index].emoji,
-                      fit: BoxFit.cover,
-                      width: 30,
-                      height: 30,
                     ),
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    categories[index].name,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  )
                 ],
               ),
             ),
-          )
-        ],
+            const SizedBox(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                movies.length,
+                (index) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.only(right: 15),
+                  width: currentIndex == index ? 30 : 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: currentIndex == index ? buttonColor : Colors.white24,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CategoryItems extends StatelessWidget {
+  const CategoryItems({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: List.generate(
+        categories.length,
+        (index) => Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: Colors.white10.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Image.asset(
+                categories[index].emoji,
+                fit: BoxFit.cover,
+                width: 30,
+                height: 30,
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              categories[index].name,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
