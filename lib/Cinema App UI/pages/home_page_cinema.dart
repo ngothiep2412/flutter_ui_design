@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ui_design/Cinema%20App%20UI/constants/constants.dart';
 import 'package:flutter_ui_design/Cinema%20App%20UI/models/category_model.dart';
 import 'package:flutter_ui_design/Cinema%20App%20UI/models/movie_model.dart';
+import 'package:flutter_ui_design/Cinema%20App%20UI/pages/detail_page.dart';
 
 class HomePageCinema extends StatefulWidget {
   const HomePageCinema({super.key});
@@ -132,7 +133,15 @@ class _HomePageCinemaState extends State<HomePageCinema> {
                             final movie = movies[index % movies.length];
 
                             return GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        MovieDetailPage(movie: movie),
+                                  ),
+                                );
+                              },
                               child: Padding(
                                 padding: EdgeInsets.only(
                                   top: 100 - (scale / 1.6 * 100),
